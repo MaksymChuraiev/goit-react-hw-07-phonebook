@@ -1,7 +1,3 @@
-import { nanoid } from 'nanoid';
-import { toast } from 'react-toastify';
-import { createContacts, getContacts } from 'redux/contactSlice';
-import { useDispatch, useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import {
   FormTitle,
@@ -10,35 +6,34 @@ import {
   FormInput,
   FormButton,
 } from './ContactForm.styled';
+import { useAddContactMutation } from 'redux/contactSlice';
 
 export const ContactForm = () => {
   const { register, handleSubmit, resetField } = useForm();
-  const dispatch = useDispatch();
-  const contactItems = useSelector(getContacts);
+  const [createContact] = useAddContactMutation();
 
-  const onSubmit = data => {
+  const onSubmit = async data => {
     const newContact = {
-      id: nanoid(),
       name: data.name,
-      number: data.number,
+      phone: data.number,
     };
 
-    addContact(data, newContact);
+    await createContact(newContact).unwrap();
 
     resetField('name');
     resetField('number');
   };
 
-  const addContact = (data, newContact) => {
-    if (
-      contactItems.some(
-        contact => contact.name.toLowerCase() === data.name.toLowerCase()
-      )
-    ) {
-      return toast.error(`${data.name} is already in contacts.`);
-    }
-    return dispatch(createContacts(newContact));
-  };
+  // const addContact = (data, newContact) => {
+  //   // if (
+  //   //   contactItems.some(
+  //   //     contact => contact.name.toLowerCase() === data.name.toLowerCase()
+  //   //   )
+  //   // ) {
+  //   //   return toast.error(`${data.name} is already in contacts.`);
+  //   // }
+  //   // return dispatch(createContacts(newContact));
+  // };
 
   return (
     <>

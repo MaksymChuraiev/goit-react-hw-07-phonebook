@@ -1,16 +1,21 @@
 import { ContactNameList } from './ContactList.styled';
 import { ContactListItem } from 'components/ContactListItem/ContactIListItem';
+import { useFetchContactsQuery } from 'redux/contactSlice';
+import { Loader } from 'components/Loader/Loader';
 import { useSelector } from 'react-redux';
-import { getContacts, getFilter } from 'redux/contactSlice';
+import { getFilter } from 'redux/contactSlice';
 
 export const ContactList = () => {
-  const contactItems = useSelector(getContacts);
+  const { data = [], isFetching } = useFetchContactsQuery();
   const filterItems = useSelector(getFilter);
 
   const getContactsList = () => {
     const filterValue = filterItems.toLowerCase().trim();
+    const sortData = [...data].sort((firstEl, secondEl) =>
+      firstEl.name.localeCompare(secondEl.name)
+    );
 
-    return contactItems.filter(contact =>
+    return sortData.filter(contact =>
       contact.name.toLowerCase().includes(filterValue)
     );
   };
@@ -18,8 +23,9 @@ export const ContactList = () => {
   return (
     <>
       <ContactNameList>
-        {getContactsList().map(({ name, number, id }) => (
-          <ContactListItem key={id} id={id} name={name} number={number} />
+        {isFetching && <Loader />}
+        {getContactsList().map(({ name, phone, id }) => (
+          <ContactListItem key={id} id={id} name={name} number={phone} />
         ))}
       </ContactNameList>
     </>

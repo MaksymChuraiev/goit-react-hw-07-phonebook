@@ -1,41 +1,69 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { persistReducer } from 'redux-persist';
-// const { createSlice } = require('@reduxjs/toolkit');
-import storage from 'redux-persist/lib/storage';
+// import { persistReducer } from 'redux-persist';
+// // const { createSlice } = require('@reduxjs/toolkit');
+// import storage from 'redux-persist/lib/storage';
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+
+export const contactApi = createApi({
+  reducerPath: 'contactApi',
+  tagTypes: ['Contact'],
+  baseQuery: fetchBaseQuery({
+    baseUrl: 'https://6289fb49e5e5a9ad321f9bd3.mockapi.io/api/v1/',
+  }),
+
+  endpoints: builder => ({
+    fetchContacts: builder.query({
+      query: () => 'contacts',
+      providesTags: ['Contact'],
+    }),
+    addContact: builder.mutation({
+      query: body => ({
+        url: 'contacts',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Contact'],
+    }),
+    deleteContact: builder.mutation({
+      query: contactId => ({
+        url: `contacts/${contactId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Contact'],
+    }),
+  }),
+});
+
+export const {
+  useFetchContactsQuery,
+  useAddContactMutation,
+  useDeleteContactMutation,
+} = contactApi;
 
 export const contactsSlice = createSlice({
   name: 'contacts',
   initialState: {
-    items: [],
     filter: '',
   },
   reducers: {
-    createContacts(state, action) {
-      state.items.push(action.payload);
-    },
     addFilter(state, action) {
       state.filter = action.payload;
-    },
-    deleteContact(state, action) {
-      state.items = state.items.filter(
-        contact => contact.id !== action.payload
-      );
     },
   },
 });
 
-const persistConfig = {
-  key: 'contacts',
-  storage,
-};
+// const persistConfig = {
+//   key: 'contacts',
+//   storage,
+// };
 
-export const contactsReducer = persistReducer(
-  persistConfig,
-  contactsSlice.reducer
-);
+// export const contactsReducer = persistReducer(
+//   persistConfig,
+//   contactsSlice.reducer
+// );
 
-export const { createContacts, addFilter, deleteContact } =
-  contactsSlice.actions;
+export const { addFilter } = contactsSlice.actions;
+export const filterReducer = contactsSlice.reducer;
 
-export const getContacts = ({ contacts }) => contacts.items;
-export const getFilter = ({ contacts }) => contacts.filter;
+// export const getContacts = ({ contacts }) => contacts.items;
+export const getFilter = state => state.filter.filter;
