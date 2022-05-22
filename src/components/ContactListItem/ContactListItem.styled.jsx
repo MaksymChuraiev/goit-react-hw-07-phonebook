@@ -33,3 +33,16 @@ export const ContactListButton = styled.button`
   width: 60px;
   margin-left: 5px;
 `;
+
+export const Form = styled.form``;
+
+export const FormInputWrap = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`;
+export const FormInput = styled.input`
+  border: none;
+  background-color: lightgray;
+`;
+export const FormButton = styled.button``;
