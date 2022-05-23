@@ -41,8 +41,23 @@ export const FormInputWrap = styled.div`
   align-items: center;
   justify-content: space-between;
 `;
-export const FormInput = styled.input`
-  border: none;
+export const FormInputName = styled.input`
+  width: 200px;
+  font-size: 15px;
+  font-weight: 700;
+  /* border: none; */
   background-color: lightgray;
 `;
-export const FormButton = styled.button``;
+export const FormInputNumber = styled.input`
+  width: 95px;
+  font-size: 15px;
+  /* border: none; */
+  background-color: lightgray;
+`;
+export const FormButton = styled.button`
+  margin-top: 5px;
+  cursor: pointer;
+  height: 20px;
+  width: 60px;
+  margin-left: 5px;
+`;

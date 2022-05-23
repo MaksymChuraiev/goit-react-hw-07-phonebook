@@ -1,4 +1,5 @@
 import { useForm } from 'react-hook-form';
+import { toast } from 'react-hot-toast';
 import {
   FormTitle,
   Form,
@@ -6,10 +7,15 @@ import {
   FormInput,
   FormButton,
 } from './ContactForm.styled';
-import { useAddContactMutation } from 'redux/contactSlice';
+import {
+  useAddContactMutation,
+  useFetchContactsQuery,
+} from 'redux/contactSlice';
 
 export const ContactForm = () => {
   const { register, handleSubmit, resetField } = useForm();
+
+  const { data: contacts } = useFetchContactsQuery();
   const [createContact] = useAddContactMutation();
 
   const onSubmit = async data => {
@@ -18,10 +24,24 @@ export const ContactForm = () => {
       phone: data.number,
     };
 
-    await createContact(newContact).unwrap();
+    if (
+      contacts.some(
+        contact => contact.name.toLowerCase() === data.name.toLowerCase()
+      )
+    ) {
+      return toast.error(`${data.name} is already in contacts.`);
+    }
 
-    resetField('name');
-    resetField('number');
+    try {
+      await createContact(newContact).unwrap();
+
+      resetField('name');
+      resetField('number');
+
+      toast.success(`${data.name} was created!`);
+    } catch (error) {
+      toast.error(`${error}`);
+    }
   };
 
   // const addContact = (data, newContact) => {

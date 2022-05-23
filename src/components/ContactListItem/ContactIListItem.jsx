@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { AnimatePresence, motion } from 'framer-motion';
+import { toast } from 'react-hot-toast';
 import {
   ContactNameItem,
   ContactTextWrap,
@@ -9,24 +10,31 @@ import {
   ContactListButton,
   Form,
   FormInputWrap,
-  FormInput,
+  FormInputName,
+  FormInputNumber,
   FormButton,
 } from './ContactListItem.styled';
 import PropTypes from 'prop-types';
 import {
   useDeleteContactMutation,
   useUpdateContactMutation,
+  useFetchContactsQuery,
 } from 'redux/contactSlice';
-// import { ModalForm } from 'components/ModalForm/ModalForm';
 
 export const ContactListItem = ({ id, name, number }) => {
   const [showButton, setShowButton] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
 
-  const { register, handleSubmit } = useForm();
-
   const [updateContact] = useUpdateContactMutation();
   const [deleteContact, { isLoading }] = useDeleteContactMutation();
+  const { data: contacts } = useFetchContactsQuery();
+
+  const { register, handleSubmit, resetField } = useForm({
+    defaultValues: {
+      name,
+      phone: number,
+    },
+  });
 
   const onShowButton = () => {
     setShowButton(!showButton);
@@ -36,10 +44,31 @@ export const ContactListItem = ({ id, name, number }) => {
     setShowEditForm(!showEditForm);
   };
 
+  const onDeleteContact = id => {
+    deleteContact(id);
+    toast.success(`${name}has been deleted!`);
+  };
+
   const onSubmit = async contact => {
-    console.log(contact);
-    await updateContact({ id, ...contact });
-    setShowEditForm(!showEditForm);
+    if (
+      contacts.some(el => el.name.toLowerCase() === contact.name.toLowerCase())
+    ) {
+      return toast.error(`${contact.name} is already in contacts.`);
+    }
+
+    try {
+      await updateContact({ id, ...contact });
+      console.log(contact);
+
+      toast.success(`${contact.name} has been changed!`);
+
+      onShowButton();
+      onShowEditForm();
+      resetField('name');
+      resetField('phone');
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -61,7 +90,7 @@ export const ContactListItem = ({ id, name, number }) => {
                   transition={{ duration: 0.5 }}
                 >
                   <ContactListButton
-                    onClick={() => deleteContact(id)}
+                    onClick={() => onDeleteContact(id)}
                     disabled={isLoading}
                   >
                     Delete
@@ -77,21 +106,29 @@ export const ContactListItem = ({ id, name, number }) => {
         {showEditForm && (
           <Form onSubmit={handleSubmit(onSubmit)}>
             <FormInputWrap>
-              <FormInput
+              <FormInputName
                 {...register('name')}
                 pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
                 title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
                 required
                 autoComplete="off"
               />
-              <FormInput
-                {...register('number')}
+              <FormInputNumber
+                {...register('phone')}
                 pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
                 title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
                 required
                 autoComplete="off"
               />
             </FormInputWrap>
+            <FormButton
+              onClick={() => {
+                onShowButton();
+                onShowEditForm();
+              }}
+            >
+              Back
+            </FormButton>
             <FormButton type="submit">Edit</FormButton>
           </Form>
         )}

@@ -3,7 +3,7 @@ import { ContactForm } from './ContactForm/ContactForm';
 import { ContactList } from './ContactList/ContactList';
 import { ContactFilter } from './ContactFilter/ContactFilter';
 import { ContactTitle } from './ContactList/ContactList.styled';
-
+import { Toaster } from 'react-hot-toast';
 // import { ToastContainer } from 'react-toastify';
 // import 'react-toastify/dist/ReactToastify.css';
 
@@ -14,6 +14,7 @@ export const App = () => {
       <ContactTitle>Contacts</ContactTitle>
       <ContactFilter />
       <ContactList />
+      <Toaster position="top-right" />
     </ContactSection>
   );
 };
